@@ -39,3 +39,15 @@ export async function openUrl (req, res){
         return res.status(500).send(err.message)
     }
 }
+
+export async function deleteShortUrl (req, res){
+    //req.params: {id: 1}
+    //res.sendStatus(204)
+    const {id} = req.params
+    try{
+        await db.query(`DELETE FROM urls WHERE id = $1`, [id])
+        return res.sendStatus(204)
+    }catch(err){
+        return res.status(500).send(err.message)
+    }
+}

@@ -2,7 +2,6 @@ import { db } from "../database/databaseConnection.js";
 
 
 export default async function validateToken(req, res, next){
-    //body: {"url": "https://..."}
     //headers: {Authorization: BEARER token}
     const {authorization} = req.headers;
     const token = authorization?.replace("Bearer ", "");
