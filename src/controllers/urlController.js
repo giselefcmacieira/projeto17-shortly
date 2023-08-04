@@ -24,7 +24,7 @@ export async function getUrlInfById (req, res){
     //req.params = {id: 1}
     const {urlInf} = res.locals //{id: 1, shortUrl: soivfn5246sxofvn, originalUrl = "https://"}
     const {id, shortUrl, originalUrl} = urlInf
-    return res.status(200).send({id, shortUrl, originalUrl});
+    return res.status(200).send({id, shortUrl, url: originalUrl});
 }
 
 export async function openUrl (req, res){
@@ -32,6 +32,9 @@ export async function openUrl (req, res){
     const {shortUrl} = req.params
     try{
         const url = await db.query(`SELECT "originalUrl", "visitCount" FROM urls WHERE "shortUrl" = $1`, [shortUrl]);
+        if(url.rowCount === 0){
+            return res.sendStatus(404)
+        }
         const visitCount = url.rows[0].visitCount + 1
         await db.query(`UPDATE urls SET "visitCount" = $1 WHERE "shortUrl" = $2`, [visitCount, shortUrl])
         return res.redirect(url.rows[0].originalUrl);
