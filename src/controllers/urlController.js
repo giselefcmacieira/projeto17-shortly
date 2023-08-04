@@ -26,3 +26,16 @@ export async function getUrlInfById (req, res){
     const {id, shortUrl, originalUrl} = urlInf
     return res.status(200).send({id, shortUrl, originalUrl});
 }
+
+export async function openUrl (req, res){
+    //req.params: {shortUrl: 'cfçlhokgn548gdb578dg'}
+    const {shortUrl} = req.params
+    try{
+        const url = await db.query(`SELECT "originalUrl", "visitCount" FROM urls WHERE "shortUrl" = $1`, [shortUrl]);
+        const visitCount = url.rows[0].visitCount + 1
+        await db.query(`UPDATE urls SET "visitCount" = $1 WHERE "shortUrl" = $2`, [visitCount, shortUrl])
+        return res.redirect(url.rows[0].originalUrl);
+    }catch(err){
+        return res.status(500).send(err.message)
+    }
+}
