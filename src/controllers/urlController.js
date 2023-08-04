@@ -51,3 +51,34 @@ export async function deleteShortUrl (req, res){
         return res.status(500).send(err.message)
     }
 }
+
+export async function getUserInfo(req, res){
+    //res.locals: {userId: 1}
+    const {userId} = res.locals
+    try{
+        const sumVisit = (await db.query(`SELECT SUM(urls."visitCount") AS "visitCountTotal"
+        FROM urls
+        WHERE urls."userId" = 1`)).rows[0].visitCountTotal //{visitCountTotal: 2}
+        const userInf = (await db.query(`SELECT users.name AS "userName", users.id AS "userId", urls.id AS "urlId", urls."shortUrl", urls."originalUrl", urls."visitCount"
+        FROM users
+        JOIN urls ON urls."userId" = users.id
+        WHERE urls."userId" = $1`, [userId])).rows
+        const array = userInf.map(inf => {
+            return{
+                id: inf.urlId,
+                shortUrl: inf.shortUrl,
+                url: inf.originalUrl,
+                visitCount: inf.visitCount
+            }
+        })
+        const obj = {
+            id: userInf[0].userId,
+            name: userInf[0].userName,
+            visitCount: Number(sumVisit),
+            shortenedUrls: array
+        }
+        return res.status(200).send(obj)
+    }catch(err){
+        return res.status(500).send(err.message)
+    }
+}
